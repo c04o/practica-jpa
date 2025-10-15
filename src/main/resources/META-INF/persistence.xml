@@ -3,7 +3,30 @@
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_2.xsd"
              version="3.2">
-    <persistence-unit name="default">
+    <persistence-unit name="uam" transaction-type="RESOURCE_LOCAL">
+        <!-- Proveedor JPA: Hibernate -->
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+
+        <!-- Entidades mapeadas -->
+        <class>entities.Cargo</class>
+        <class>entities.Empleado</class>
+
+        <!-- Propiedades de la configuración -->
+        <properties>
+            <!-- Conexión a PostrgeSQL -->
+            <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/fiadb"/>
+            <property name="jakarta.persistence.jdbc.user" value="c04o"/>
+            <property name="jakarta.persistence.jdbc.password" value="1234"/>
+
+            <!-- Dialecto de Hibernate para PostgreSQL -->
+            <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
+            <!-- Generar tablas automáticamente (update: crea o actualiza; create: crea desde cero) -->
+            <property name="hibernate.hbm2ddl.auto" value="update"/>
+            <!-- Mostrar SQL en consola para depuración -->
+            <property name="hibernate.show_sql" value="true"/>
+            <property name="hibernate.format_sql" value="true"/>
+        </properties>
 
     </persistence-unit>
 </persistence>
