@@ -1,6 +1,5 @@
 package repository.dao;
 
-import entities.Cargo;
 import entities.Empleado;
 import jakarta.persistence.EntityManager;
 import repository.IEmpleado;
@@ -8,7 +7,8 @@ import repository.IEmpleado;
 import java.util.List;
 
 public class EmpleadoDao implements IEmpleado {
-    private EntityManager em;
+
+    private final EntityManager em;
 
     public EmpleadoDao(EntityManager em) {
         this.em = em;
@@ -18,42 +18,44 @@ public class EmpleadoDao implements IEmpleado {
     public Empleado guardar(Empleado empleado) {
         try {
             em.getTransaction().begin();
-            em.persist(empleado);
+
+            if (empleado.getId() == null) {
+                em.persist(empleado); // nuevo registro
+            } else {
+                empleado = em.merge(empleado); // actualización
+            }
+
             em.getTransaction().commit();
             return empleado;
+
         } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
-            throw new RuntimeException("Error al guardar empleado", e);
+            em.getTransaction().rollback();
+            throw e;
         }
     }
 
     @Override
     public List<Empleado> listar() {
-        try {
-            return em.createQuery("SELECT e FROM Empleado e", Empleado.class).getResultList();
-        } catch (Exception e) {
-            throw new RuntimeException("Error al listar empleados", e);
-        }
+        return em.createQuery("from Empleado", Empleado.class).getResultList();
     }
 
     @Override
-    public void asignarCargo(Long empleadoId, Long cargoId) {
+    public Empleado buscarPorId(Long id) {
+        return em.find(Empleado.class, id);
+    }
+
+    @Override
+    public void eliminar(Long id) {
         try {
             em.getTransaction().begin();
-            Empleado empleado = em.find(Empleado.class, empleadoId);
-            Cargo cargo = em.find(Cargo.class, cargoId);
-            if (empleado != null && cargo != null) {
-                empleado.setCargo(cargo);
-                em.merge(empleado);
+            Empleado empleado = em.find(Empleado.class, id);
+            if (empleado != null) {
+                em.remove(empleado);
             }
             em.getTransaction().commit();
         } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
-            throw new RuntimeException("Error al asignar cargo", e);
+            em.getTransaction().rollback();
+            throw e;
         }
     }
 }

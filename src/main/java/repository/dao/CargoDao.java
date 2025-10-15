@@ -7,7 +7,8 @@ import repository.ICargo;
 import java.util.List;
 
 public class CargoDao implements ICargo {
-    private EntityManager em;
+
+    private final EntityManager em;
 
     public CargoDao(EntityManager em) {
         this.em = em;
@@ -17,23 +18,44 @@ public class CargoDao implements ICargo {
     public Cargo guardar(Cargo cargo) {
         try {
             em.getTransaction().begin();
-            em.persist(cargo);
+
+            if (cargo.getId() == null) {
+                em.persist(cargo);
+            } else {
+                cargo = em.merge(cargo);
+            }
+
             em.getTransaction().commit();
             return cargo;
+
         } catch (Exception e) {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
-            throw new RuntimeException("Error al guardar cargo", e);
+            em.getTransaction().rollback();
+            throw e;
         }
     }
 
     @Override
     public List<Cargo> listar() {
+        return em.createQuery("from Cargo", Cargo.class).getResultList();
+    }
+
+    @Override
+    public Cargo buscarPorId(Long id) {
+        return em.find(Cargo.class, id);
+    }
+
+    @Override
+    public void eliminar(Long id) {
         try {
-            return em.createQuery("SELECT c FROM Cargo c", Cargo.class).getResultList();
+            em.getTransaction().begin();
+            Cargo cargo = em.find(Cargo.class, id);
+            if (cargo != null) {
+                em.remove(cargo);
+            }
+            em.getTransaction().commit();
         } catch (Exception e) {
-            throw new RuntimeException("Error al listar cargos", e);
+            em.getTransaction().rollback();
+            throw e;
         }
     }
 }

@@ -13,7 +13,7 @@ public class Cargo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "nombre_cargo", length = 100, nullable = false)
+    @Column(name = "nombre_cargo", length = 100, nullable = false, unique = true)
     private String nombre;
 
     @Column(name = "descripcion_cargo", length = 255)
@@ -22,9 +22,9 @@ public class Cargo {
     @Override
     public String toString() {
         return "Datos del Cargo" + '\n' +
-                "id: " + id +
-                "| nombre: '" + nombre + '\n' +
-                "| descripcion: '" + descripcion + '\n' +
+                "id: " + id + '\n' +
+                "| nombre: " + nombre + '\n' +
+                "| descripción: " + descripcion + '\n' +
                 "=================================================";
     }
 }
